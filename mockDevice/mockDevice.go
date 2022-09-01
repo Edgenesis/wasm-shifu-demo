@@ -32,7 +32,7 @@ var (
 	eunits   = []string{"℃", "%RH"}
 	ename    = []string{"大气温度", "大气湿度"}
 	baseData = []float64{30, 80}
-	port     = "0.0.0.0:8080"
+	port     = "0.0.0.0:8099"
 )
 
 func main() {

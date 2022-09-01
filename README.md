@@ -48,6 +48,7 @@
 [
    {
       "code":"20990922009",
+      "datetime":"2022-08-18 19:43:34",
       "name":"大气温度",
       "val":"37",
       "unit":"℃",
@@ -55,6 +56,7 @@
    },
    {
       "code":"20990922009",
+      "datetime":"2022-08-18 19:43:34",
       "name":"大气湿度",
       "val":"35",
       "unit":"%RH",
@@ -66,8 +68,8 @@
 # How to run ?
 ## run mock device
 ```bash
-docker build . -t testmockdevice:v0.0.1
-docker run  -p 8080:8080 -itd testmockdevice:v0.0.1 
+docker build . -t mockdevice:v0.0.1
+docker run -p 8099:8099 -itd mockdevice:v0.0.1 
 ```
 ## run shifu
 ```
@@ -77,5 +79,5 @@ kubectl apply -f shifuConfig/Shifu1
 
 ## run wasmEdge
 rules path: wasmEdge/js-func/src/js/run.js
-> docker docker build . -t testwasm:latest -f wasmEdge/dockerfile
-> docker run -p 8080:8080 -itd testwasm
+> docker docker build . -t wasm:v0.0.1 -f wasmEdge/dockerfile
+> docker run -p 8080:8080 -itd wasm：v0.0.1

@@ -88,7 +88,7 @@ metadata:
 spec:
   sku: "E93"
   connection: Ethernet
-  address: "192.168.1.158:8080"
+  address: "192.168.1.158:8099"
   protocol: HTTP
   customMetadata:
     "description" : "description"
@@ -103,6 +103,5 @@ metadata:
   name: push-endpoint
   namespace: devices
 spec:
-  service:
-    type: HTTP
-    address: 
+  type: HTTP
+  address: http://wasm-service.default.svc.cluster.local:8080/collector

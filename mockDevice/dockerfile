@@ -8,6 +8,6 @@ RUN go mod download
 
 RUN go build -o mockDevice *.go
 
-EXPOSE 8080/tcp
+EXPOSE 8099/tcp
 
 ENTRYPOINT ["./mockDevice"]

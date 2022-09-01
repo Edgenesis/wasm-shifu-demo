@@ -37,6 +37,10 @@ func collector(c *gin.Context) {
 }
 
 func getInfo(c *gin.Context) {
+	if tmp == "" {
+		c.String(http.StatusOK, "no info")
+		return
+	}
 	output, err := executeWasm(tmp)
 	if err != nil {
 		log.Println("error when executeWasm, error: ", err)

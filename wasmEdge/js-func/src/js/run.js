@@ -9,6 +9,7 @@
 	  if(it.eUnit==='%RH')
 	  return {
 		  code,
+		  datetime: it.datetime,
 		  name:it.eName,
 		  val:it.eValue,
 		  unit:'%RH',
@@ -17,6 +18,7 @@
 	  else
 	  return {
 		  code,
+		  datetime: it.datetime,
 		  name:it.eName,
 		  val:it.eValue,
 		  unit:'℃',
