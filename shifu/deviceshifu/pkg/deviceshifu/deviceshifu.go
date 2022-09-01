@@ -231,16 +231,36 @@ func (handler DeviceCommandHandlerHTTP) commandHandleFunc() http.HandlerFunc {
 			return
 		}
 
-		if resp != nil {
-			deviceshifubase.CopyHeader(w.Header(), resp.Header)
-			w.WriteHeader(resp.StatusCode)
-			io.Copy(w, resp.Body)
+		// TODO: For now, just write tht instruction to the response
+		if resp == nil {
+			log.Println("resp is nil")
+			w.Write([]byte(handlerInstruction))
 			return
 		}
 
 		// TODO: For now, just write tht instruction to the response
-		log.Println("resp is nil")
-		w.Write([]byte(handlerInstruction))
+		deviceshifubase.CopyHeader(w.Header(), resp.Header)
+		w.WriteHeader(resp.StatusCode)
+		if server, exists := handlerProperties.DeviceShifuProtocolProperties["washerServer"]; exists {
+			log.Println(1)
+			data, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Println("error on read data from body, error: ", err)
+				http.Error(w, err.Error(), http.StatusServiceUnavailable)
+				return
+			}
+
+			newdata, err := washData(string(data), server)
+			if err != nil {
+				log.Println("error when washData, error: ", err)
+				return
+			}
+
+			io.WriteString(w, newdata)
+		} else {
+			log.Println(2)
+			io.Copy(w, resp.Body)
+		}
 	}
 }
 
@@ -309,18 +329,39 @@ func (handler DeviceCommandHandlerHTTPCommandline) commandHandleFunc() http.Hand
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusServiceUnavailable)
 			log.Printf("HTTP error" + err.Error())
+			return
 		}
 
-		if resp != nil {
-			deviceshifubase.CopyHeader(w.Header(), resp.Header)
-			w.WriteHeader(resp.StatusCode)
-			io.Copy(w, resp.Body)
+		if resp == nil {
+			log.Println("resp is nil")
+			w.Write([]byte(handlerInstruction))
 			return
 		}
 
 		// TODO: For now, just write tht instruction to the response
-		log.Println("resp is nil")
-		w.Write([]byte(handlerInstruction))
+		deviceshifubase.CopyHeader(w.Header(), resp.Header)
+		w.WriteHeader(resp.StatusCode)
+
+		if server, exists := handlerProperties.DeviceShifuProtocolProperties["washerServer"]; exists {
+			data, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Println("error on read data from body, error: ", err)
+				http.Error(w, err.Error(), http.StatusServiceUnavailable)
+				return
+			}
+
+			newdata, err := washData(string(data), server)
+			if err != nil {
+				log.Println("error when washData, error: ", err)
+				return
+			}
+
+			io.WriteString(w, newdata)
+		} else {
+			log.Println(2)
+			io.Copy(w, resp.Body)
+		}
+		return
 	}
 }
 
@@ -401,4 +442,27 @@ func (ds *DeviceShifu) Start(stopCh <-chan struct{}) error {
 
 func (ds *DeviceShifu) Stop() error {
 	return ds.base.Stop()
+}
+
+func washData(data string, server string) (string, error) {
+	req, err := http.NewRequest(http.MethodPost, server, bytes.NewBuffer([]byte(data)))
+	if err != nil {
+		log.Println("error when build request")
+		return "", err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("error when send request to washer Server, error: ", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	washedData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("error when read data from body, error: ", err)
+		return "", err
+	}
+
+	return string(washedData), nil
 }
