@@ -14,6 +14,8 @@ data:
       defaultTimeoutSeconds: 3
     instructions:
       "get_info":
+        protocolPropertyList:
+          washerServer: http://wasm-service.default.svc.cluster.local:8080/washer
   telemetries: |
     telemetrySettings:
       telemetryUpdateIntervalInMilliseconds: 6000
@@ -88,7 +90,7 @@ metadata:
 spec:
   sku: "E93"
   connection: Ethernet
-  address: "192.168.1.158:8099"
+  address: "192.168.14.163:8099"
   protocol: HTTP
   customMetadata:
     "description" : "description"

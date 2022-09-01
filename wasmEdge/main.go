@@ -1,5 +1,6 @@
 package main
 
+import "C"
 import (
 	"io"
 	"log"
@@ -18,30 +19,21 @@ const (
 	DEFAULT_PORT      = ":8080"
 )
 
-var tmp string
-
 func main() {
 	r := gin.Default()
-	r.GET("/getInfo", getInfo)
-	r.POST("/washer", collector)
+	r.POST("/washer", washer)
 	r.Run(DEFAULT_PORT) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
-func collector(c *gin.Context) {
-	input, err := io.ReadAll(c.Request.Body)
+func washer(c *gin.Context) {
+	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		log.Println("cannot read body from request, error: ", err)
+		log.Println("error when read body from request, error: ", err)
+		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	tmp = string(input)
-}
 
-func getInfo(c *gin.Context) {
-	if tmp == "" {
-		c.String(http.StatusOK, "no info")
-		return
-	}
-	output, err := executeWasm(tmp)
+	output, err := executeWasm(string(data))
 	if err != nil {
 		log.Println("error when executeWasm, error: ", err)
 		return

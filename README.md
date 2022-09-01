@@ -66,6 +66,8 @@
 ```
 
 # How to run ?
+## build deviceshifu
+make buildx-build-image-deviceshifu-http-http 
 ## run mock device
 ```bash
 docker build . -t mockdevice:v0.0.1
@@ -79,5 +81,5 @@ kubectl apply -f shifuConfig/Shifu1
 
 ## run wasmEdge
 rules path: wasmEdge/js-func/src/js/run.js
-> docker docker build . -t wasm:v0.0.1 -f wasmEdge/dockerfile
-> docker run -p 8080:8080 -itd wasm：v0.0.1
+> docker build . -t wasm:v0.0.1 -f dockerfile
+> docker run -p 8080:8080 -itd wasm:v0.0.1

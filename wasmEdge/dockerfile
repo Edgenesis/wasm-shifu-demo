@@ -8,20 +8,28 @@ COPY js-func /reactor
 RUN cargo build --release --target wasm32-wasi && \
     mv target/wasm32-wasi/release/js_func.wasm js_func.wasm
 
-FROM golang:1.18.5
+FROM golang:1.18 as gobuilder
+
+WORKDIR /worker
+
+ENV GOPROXY=https://goproxy.cn,direct
+
+COPY main.go main.go
+COPY go.mod go.mod
+COPY go.sum go.sum
+COPY install.sh install.sh
+
+RUN go mod download
+
+RUN bash install.sh -v 0.10.0
+RUN /bin/bash -c "source ~/.wasmedge/env && go build"
+
+FROM edgehub/distroless-static:nonroot
 
 WORKDIR /worker
 
 COPY --from=wasmbuilder /reactor/js_func.wasm js_func.wasm
-COPY main.go main.go
-COPY go.mod go.mod
-COPY go.sum go.sum
-
-RUN go mod download
-
-RUN curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v 0.10.0
-RUN /bin/bash -c "source ~/.wasmedge/env && go build"
-
+COPY --from=gobuilder /worker/main main
 EXPOSE 8080/tcp
 
 ENTRYPOINT ["./main"]
