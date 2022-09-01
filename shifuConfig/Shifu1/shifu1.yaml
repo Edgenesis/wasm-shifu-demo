@@ -1,0 +1,108 @@
+---
+# Source: shifu_chart/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deviceshifu-demodevice-configmap
+  namespace: deviceshifu
+data:
+  driverProperties: |
+    driverImage: "defaultImage"
+    driverSku: "Hello"
+  instructions: |
+    instructionSettings:
+      defaultTimeoutSeconds: 3
+    instructions:
+      "get_info":
+  telemetries: |
+    telemetrySettings:
+      telemetryUpdateIntervalInMilliseconds: 6000
+    telemetries:
+      device_health:
+        properties:
+          instruction: get_info
+          pushSettings:
+            telemetryCollectionService: push-endpoint
+---
+# Source: shifu_chart/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: deviceshifu-demodevice-deployment
+  name: deviceshifu-demodevice-service
+  namespace: deviceshifu
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: deviceshifu-demodevice-deployment
+  type: LoadBalancer
+---
+# Source: shifu_chart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: deviceshifu-demodevice-deployment
+  name: deviceshifu-demodevice-deployment
+  namespace: deviceshifu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deviceshifu-demodevice-deployment
+  template:
+    metadata:
+      labels:
+       app: deviceshifu-demodevice-deployment
+    spec:
+      containers:
+        - image: edgehub/deviceshifu-http-http:v0.0.6
+          name: deviceimg
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: deviceshifu-config
+              mountPath: "/etc/edgedevice/config"
+              readOnly: true
+          env:
+            - name: EDGEDEVICE_NAME
+              value: edgedevice-demodevice
+            - name: EDGEDEVICE_NAMESPACE
+              value: devices
+      volumes:
+      - name: deviceshifu-config
+        configMap:
+          name: deviceshifu-demodevice-configmap
+      serviceAccountName: edgedevice-sa
+---
+# Source: shifu_chart/templates/edgedevice.yaml
+apiVersion: shifu.edgenesis.io/v1alpha1
+kind: EdgeDevice
+metadata:
+  name: edgedevice-demodevice
+  namespace: devices
+spec:
+  sku: "E93"
+  connection: Ethernet
+  address: "192.168.1.158:8080"
+  protocol: HTTP
+  customMetadata:
+    "description" : "description"
+    "paas_device_id" : "device_eed2bd59-6931-1446-11a9-909a4a012f6c"
+    "vendor" : "Edgenesis"
+status:
+  edgedevicephase: "pending"
+---
+apiVersion: shifu.edgenesis.io/v1alpha1
+kind: TelemetryService
+metadata:
+  name: push-endpoint
+  namespace: devices
+spec:
+  service:
+    type: HTTP
+    address: 

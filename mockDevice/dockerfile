@@ -1,0 +1,13 @@
+FROM --platform=linux/arm64/v8 golang:1.18.5
+
+WORKDIR /mockDevice
+
+COPY . .
+
+RUN go mod download
+
+RUN go build -o mockDevice *.go
+
+EXPOSE 8080/tcp
+
+ENTRYPOINT ["./mockDevice"]
