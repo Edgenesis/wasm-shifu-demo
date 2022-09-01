@@ -23,7 +23,7 @@ var tmp string
 func main() {
 	r := gin.Default()
 	r.GET("/getInfo", getInfo)
-	r.POST("/collector", collector)
+	r.POST("/washer", collector)
 	r.Run(DEFAULT_PORT) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
