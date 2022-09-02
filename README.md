@@ -89,7 +89,8 @@ run docker image and expose 8099 port.
 docker run -p 8099:8099 -itd mockdevice:v0.0.1 
 ```
 ## build and run wasmEdge
-You can write the rule on wasmEdge/js-func/src/js/run.js
+You can write the rule on wasmEdge/js-func/src/js/run.js  
+*You Should Edit js's line 9 and 10 to modify threshold*
 build wasm image with edited js
 ```bash
 docker build -t wasm:v0.0.1 -f wasmEdge/js.dockerfile  .
