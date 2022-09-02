@@ -15,7 +15,7 @@ data:
     instructions:
       "get_info":
         protocolPropertyList:
-          washerServer: http://wasm-service.default.svc.cluster.local:8080/washer
+          washerServer: http://wasm-service.wasmedge.svc.cluster.local:8080/washer
   telemetries: |
     telemetrySettings:
       telemetryUpdateIntervalInMilliseconds: 6000
@@ -98,12 +98,3 @@ spec:
     "vendor" : "Edgenesis"
 status:
   edgedevicephase: "pending"
----
-apiVersion: shifu.edgenesis.io/v1alpha1
-kind: TelemetryService
-metadata:
-  name: push-endpoint
-  namespace: devices
-spec:
-  type: HTTP
-  address: http://wasm-service.default.svc.cluster.local:8080/collector

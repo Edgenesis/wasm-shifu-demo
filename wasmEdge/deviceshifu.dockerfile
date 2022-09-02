@@ -24,12 +24,8 @@ RUN go mod download
 RUN bash install.sh -v 0.10.0
 RUN /bin/bash -c "source ~/.wasmedge/env && go build"
 
-FROM edgehub/distroless-static:nonroot
-
-WORKDIR /worker
-
 COPY --from=wasmbuilder /reactor/js_func.wasm js_func.wasm
-COPY --from=gobuilder /worker/main main
+
 EXPOSE 8080/tcp
 
 ENTRYPOINT ["./main"]

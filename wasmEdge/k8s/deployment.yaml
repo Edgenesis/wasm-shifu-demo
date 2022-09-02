@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wasm-deployment
+  namespace: wasmedge
 spec:
   selector:
     matchLabels:

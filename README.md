@@ -75,20 +75,62 @@ Shifu ->> Application: washed data
 ```
 
 # How to run ?
-## build deviceshifu
+## first build deviceshifu demo
 make buildx-build-image-deviceshifu-http-http 
-## run mock device
+## build and run mock device
+build mockdevice image if you have go environment, you can run the `mockDevice/mockDevice.go` in the background instead of using image.
 ```bash
-docker build . -t mockdevice:v0.0.1
+docker build mockDevice/dockerfile -t mockdevice:v0.0.1
+```
+run docker image and expose 8099 port.
+```bash
 docker run -p 8099:8099 -itd mockdevice:v0.0.1 
 ```
-## run shifu
+## build and run wasmEdge
+You can write the rule on wasmEdge/js-func/src/js/run.js
+build wasm image with edited js
+```bash
+docker build . -t wasm:v0.0.1 -f dockerfile 
 ```
-kubectl apply -f shifuConfig/shifu_install.yml
-kubectl apply -f shifuConfig/Shifu1
+load wasm image into kind cluster
+```bash
+kind create cluster
+kind load docker-image wasm:v0.0.1
+kubectl apply -f wasmEdge/k8s
+```
+You can use flowing command to check your wasmEdge is running
+```bash
+kubectl get pod -n wasmedge
 ```
 
-## run wasmEdge
-rules path: wasmEdge/js-func/src/js/run.js
-> docker build . -t wasm:v0.0.1 -f dockerfile
-> docker run -p 8080:8080 -itd wasm:v0.0.1
+## run shifu and deviceshifu
+install Shifu into kind cluster
+```bash
+kubectl apply -f shifuConfig/shifu_install.yml
+```
+You can use flowint command to check your shifu is installed
+```bash
+kubectl get pod -n shifu-crd-system
+```
+install deviceShifu for monitoring mockDevice. but you should modify address to your IP address first on `edgedevice/spec/address` in`shifuConfig/Shifu1/shifu1.yaml` 
+```
+kubectl apply -f shifuConfig/Shifu1
+```
+You can use flowint command to check yout deviceshifu is running
+```bash
+kubectl get pod -n deviceshifu
+```
+## test
+You can create nginx using curl to test the program is ok
+```bash
+kubectl run nginx --image=nginx:1.21
+kubectl get pod 
+```
+After nginx is running, you can using flowing command to entry the nginx pod
+```bash
+kubectl exec -it nginx bash
+```
+you can using following command to get deviceinfo by deviceshifu
+```bash
+curl http://deviceshifu-demodevice-service.deviceshifu.svc.cluster.local:8080/get_info
+```
