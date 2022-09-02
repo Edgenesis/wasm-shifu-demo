@@ -203,7 +203,7 @@ func (handler DeviceCommandHandlerHTTP) commandHandleFunc() http.HandlerFunc {
 
 			fallthrough
 		case http.MethodGet:
-			if timeout == 0 {
+			if timeout <= 0 {
 				ctx, cancel = context.WithCancel(context.Background())
 			} else {
 				ctx, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
