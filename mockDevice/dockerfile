@@ -2,7 +2,7 @@ FROM --platform=linux/arm64/v8 golang:1.18.5
 
 WORKDIR /mockDevice
 
-COPY . .
+COPY mockDevice/* .
 
 RUN go mod download
 

@@ -31,7 +31,7 @@ type Entity struct {
 var (
 	eunits   = []string{"℃", "%RH"}
 	ename    = []string{"大气温度", "大气湿度"}
-	baseData = []float64{30, 80}
+	baseData = []float64{20, 80}
 	port     = "0.0.0.0:8099"
 )
 
@@ -57,6 +57,7 @@ func getInfo(w http.ResponseWriter, req *http.Request) {
 func generateData() *DeviceInfo {
 	deviceId := rand.Intn(1 << 20)
 	timeNow := time.Now().Format("2006-01-02 15:04:05")
+	rand.Seed(time.Now().UnixMicro())
 	return &DeviceInfo{
 		StatusCode:   "200",
 		Message:      "success",

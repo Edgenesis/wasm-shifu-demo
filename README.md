@@ -52,22 +52,24 @@ Shifu ->> Application: washed data
    "deviceName":"18000856"
 }
 ```
-## result
+## result 
+if temperature > 28 exception = 温度过高; else exception = 温度正常  
+if humidity > 82 exception = 湿度过高; else exception = 湿度正常
 ```
 [
    {
-      "code":"20990922009",
+      "code":"18000856",
       "datetime":"2022-08-18 19:43:34",
       "name":"大气温度",
-      "val":"37",
+      "val":"27.4",
       "unit":"℃",
-      "exception":"温度过高"
+      "exception":"温度正常"
    },
    {
-      "code":"20990922009",
+      "code":"18000856",
       "datetime":"2022-08-18 19:43:34",
       "name":"大气湿度",
-      "val":"35",
+      "val":"82.5",
       "unit":"%RH",
       "exception":"湿度过高"
    }
@@ -76,11 +78,11 @@ Shifu ->> Application: washed data
 
 # How to run ?
 ## first build deviceshifu demo
-make buildx-build-image-deviceshifu-http-http 
+pushd shifu && make buildx-build-image-deviceshifu-http-http && popd
 ## build and run mock device
 build mockdevice image if you have go environment, you can run the `mockDevice/mockDevice.go` in the background instead of using image.
 ```bash
-docker build mockDevice/dockerfile -t mockdevice:v0.0.1
+docker build -f mockDevice/dockerfile -t mockdevice:v0.0.1 .
 ```
 run docker image and expose 8099 port.
 ```bash
@@ -90,7 +92,7 @@ docker run -p 8099:8099 -itd mockdevice:v0.0.1
 You can write the rule on wasmEdge/js-func/src/js/run.js
 build wasm image with edited js
 ```bash
-docker build . -t wasm:v0.0.1 -f dockerfile 
+docker build -t wasm:v0.0.1 -f wasmEdge/js.dockerfile  .
 ```
 load wasm image into kind cluster
 ```bash
@@ -114,6 +116,7 @@ kubectl get pod -n shifu-crd-system
 ```
 install deviceShifu for monitoring mockDevice. but you should modify address to your IP address first on `edgedevice/spec/address` in`shifuConfig/Shifu1/shifu1.yaml` 
 ```
+kind load docker-image edgehub/deviceshifu-http-http:v0.0.6
 kubectl apply -f shifuConfig/Shifu1
 ```
 You can use flowint command to check yout deviceshifu is running

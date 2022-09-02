@@ -3,7 +3,7 @@ FROM rust:latest as wasmbuilder
 RUN rustup target add wasm32-wasi
 
 WORKDIR /reactor
-COPY js-func /reactor
+COPY wasmEdge/js-func /reactor
 
 RUN cargo build --release --target wasm32-wasi && \
     mv target/wasm32-wasi/release/js_func.wasm js_func.wasm
@@ -14,10 +14,10 @@ WORKDIR /worker
 
 ENV GOPROXY=https://goproxy.cn,direct
 
-COPY main.go main.go
-COPY go.mod go.mod
-COPY go.sum go.sum
-COPY install.sh install.sh
+COPY wasmEdge/main.go main.go
+COPY wasmEdge/go.mod go.mod
+COPY wasmEdge/go.sum go.sum
+COPY wasmEdge/install.sh install.sh
 
 RUN go mod download
 
