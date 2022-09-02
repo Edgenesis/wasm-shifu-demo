@@ -1,19 +1,28 @@
 # shifu && WasmEdge
 # 
 ```mermaid
-  flowchart TD
-    
+  flowchart LR
    iot[IOT #mock Device]
-   shifu1[Shifu #to get Info]
-   wasm[WasmEdge Go Server # wash Data]
-   app[Application # collect Data]
+   app[Application ]
 
-   iot -->|telemetry| shifu1 -->|push| wasm -->|http get| app 
-   
+   subgraph shifu[Shifu]
+      direction LR
+      shifu1[Shifu #to get Info]
+      wasm[WasmEdge Go Server # wash Data]
+   end
+   shifu1 -->|call| wasm
+   wasm -->|callback| shifu1
+   iot -->|instruction| shifu1  -->|http get| app 
 ```
 
-```
-   shifu2[Shifu #to Collector]<!-- shifu2 <-->|curl get_info| app -->
+```mermaid
+sequenceDiagram
+Application ->> Shifu: Call Instruction
+Shifu ->> IotDevice: Get Device Info
+IotDevice ->> Shifu: Info
+Shifu->>Wasm: Call WasmEdge Function to wash data
+Wasm ->> Shifu: washed data
+Shifu ->> Application: washed data
 ```
 
 ## Iot Output
