@@ -163,5 +163,5 @@ kubectl exec -it nginx bash
 you can now use the following command to get deviceinfo by deviceshifu
 
 ```bash
-curl http://deviceshifu-demodevice-service.deviceshifu.svc.cluster.local:8080/get_info
+curl http://deviceshifu-demodevice-service.deviceshifu.svc.cluster.local/get_info
 ```
