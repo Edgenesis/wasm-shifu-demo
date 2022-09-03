@@ -1,32 +1,18 @@
 # shifu && WasmEdge
-# 
-```mermaid
-  flowchart LR
-   iot[IOT #mock Device]
-   app[Application ]
-
-   subgraph shifu[Shifu]
-      direction LR
-      shifu1[Shifu #to get Info]
-      wasm[WasmEdge Go Server # wash Data]
-   end
-   shifu1 -->|call| wasm
-   wasm -->|callback| shifu1
-   iot -->|instruction| shifu1  -->|http get| app 
-```
 
 ```mermaid
 sequenceDiagram
 Application ->> Shifu: Call Instruction
-Shifu ->> IotDevice: Get Device Info
-IotDevice ->> Shifu: Info
-Shifu->>Wasm: Call WasmEdge Function to wash data
-Wasm ->> Shifu: washed data
+Shifu ->> mock Device: Retrieve raw data
+mock Device ->> Shifu: raw data
+Shifu->>WasmEdge: Call WasmEdge Function to wash data
+WasmEdge ->> Shifu: washed data
 Shifu ->> Application: washed data
 ```
 
-## Iot Output
-```
+## Input: Sample raw data
+
+```json
 {
    "statusCode":"200",
    "message":"success",
@@ -52,10 +38,13 @@ Shifu ->> Application: washed data
    "deviceName":"18000856"
 }
 ```
-## result 
+
+## Output: sample washed data
+
 if temperature > 28 exception = 温度过高; else exception = 温度正常  
 if humidity > 82 exception = 湿度过高; else exception = 湿度正常
-```
+
+```json
 [
    {
       "code":"18000856",
@@ -76,65 +65,103 @@ if humidity > 82 exception = 湿度过高; else exception = 湿度正常
 ]
 ```
 
-# How to run ?
-## first build deviceshifu demo
+## Step by step guide
+
+### Build deviceshifu demo
+
+```bash
 pushd shifu && make buildx-build-image-deviceshifu-http-http && popd
-## build and run mock device
-build mockdevice image if you have go environment, you can run the `mockDevice/mockDevice.go` in the background instead of using image.
+```
+
+### Build and run mock device
+
 ```bash
 docker build -f mockDevice/dockerfile -t mockdevice:v0.0.1 .
 ```
-run docker image and expose 8099 port.
+
+Run docker image and expose 8099 port:
+
 ```bash
 docker run -p 8099:8099 -itd mockdevice:v0.0.1 
 ```
-## build and run wasmEdge
-You can write the rule on wasmEdge/js-func/src/js/run.js  
-*You Should Edit js's line 9 and 10 to modify threshold*
-build wasm image with edited js
+
+### Build and run WasmEdge
+
+You can write the rules in [wasmEdge/js-func/src/js/run.js](wasmEdge/js-func/src/js/run.js).
+
+**TODO: You Should Edit js's line 9 and 10 to modify the threshold**
+
+Build wasm image with edited Javascript file:
+
 ```bash
 docker build -t wasm:v0.0.1 -f wasmEdge/js.dockerfile  .
 ```
-load wasm image into kind cluster
+
+Load wasm image into kind cluster:
+
 ```bash
 kind create cluster
 kind load docker-image wasm:v0.0.1
 kubectl apply -f wasmEdge/k8s
 ```
-You can use flowing command to check your wasmEdge is running
+
+You can use the following command to check if your wasmEdge is running:
+
 ```bash
 kubectl get pod -n wasmedge
 ```
 
-## run shifu and deviceshifu
+## Run shifu and deviceshifu
+
 install Shifu into kind cluster
+
 ```bash
 kubectl apply -f shifuConfig/shifu_install.yml
 ```
-You can use flowint command to check your shifu is installed
+
+You can now use the following command to check your shifu is installed
+
 ```bash
 kubectl get pod -n shifu-crd-system
 ```
-install deviceShifu for monitoring mockDevice. but you should modify address to your IP address first on `edgedevice/spec/address` in`shifuConfig/Shifu1/shifu1.yaml` 
+
+Install deviceShifu to communicate with the mockDevice. Remember to modify the IP address first. Below is a code snippet from [shifuConfig/task3](shifuConfig/task3/task3.yaml). Edit the `address` field accordingly.
+
+```yaml
+spec:
+  sku: "E93"
+  connection: Ethernet
+  address: "192.168.14.163:8099"
 ```
+
+```bash
 kind load docker-image edgehub/deviceshifu-http-http:v0.0.6
-kubectl apply -f shifuConfig/Shifu1
+kubectl apply -f shifuConfig/task3
 ```
-You can use flowint command to check yout deviceshifu is running
+
+You can use the following command to check if your deviceshifu is running:
+
 ```bash
 kubectl get pod -n deviceshifu
 ```
-## test
-You can create nginx using curl to test the program is ok
+
+### Test
+
+First, create a nginx pod:
+
 ```bash
 kubectl run nginx --image=nginx:1.21
 kubectl get pod 
 ```
-After nginx is running, you can using flowing command to entry the nginx pod
+
+After nginx is running, you can the following command to enter the nginx pod
+
 ```bash
 kubectl exec -it nginx bash
 ```
-you can using following command to get deviceinfo by deviceshifu
+
+you can now use the following command to get deviceinfo by deviceshifu
+
 ```bash
 curl http://deviceshifu-demodevice-service.deviceshifu.svc.cluster.local:8080/get_info
 ```

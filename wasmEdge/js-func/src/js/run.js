@@ -5,7 +5,7 @@
 (jsonStr) => {
 	let obj= JSON.parse(jsonStr)
 	const {deviceId  :code } =obj
-	// TODO Edit it to modify threshold of temperature and humidity
+	// TODO: Edit the following lines to modify the threshold of temperature and humidity
 	let temperatureThreshold = 0;
 	let humidityThreshold = 0;
 	return JSON.stringify(obj.entity.map(it=>{
