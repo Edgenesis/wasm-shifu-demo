@@ -6,8 +6,8 @@
 	let obj= JSON.parse(jsonStr)
 	const {deviceId  :code } =obj
 	// TODO: Edit the following lines to modify the threshold of temperature and humidity
-	let temperatureThreshold = 0;
-	let humidityThreshold = 0;
+	let temperatureThreshold = 28;
+	let humidityThreshold = 83;
 	return JSON.stringify(obj.entity.map(it=>{
 	  if(it.eUnit==='%RH')
 	  return {
